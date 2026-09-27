@@ -1,22 +1,28 @@
+import os
 import json
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FINANCE_FILE = os.path.join(BASE_DIR, "finance.json")
+
 ##### Personel Finance Tracker #####
 def display_menu():
     print("1. Add Expense")
-    print("2. Income")
+    print("2. Add Income")
     print("3. View Expenses")
     print("4. View income")
     print("5. Statistics")
     print("6. Delete Expense")
-    print("7. Exit")
+    print("7. Delete Income")
+    print("8. Exit")
 
 def save_data(personel_finance):
-    with open("finance.json", "w") as file:
+    with open(FINANCE_FILE, "w") as file:
         json.dump(personel_finance, file, indent=4)
 
 
 def load_data():
     try:
-        with open("finance.json", "r") as file:
+        with open(FINANCE_FILE, "r") as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return {"expenses": [], "Income": []}
@@ -28,7 +34,7 @@ def add_expense(personel_finance):
     else:
         next_id = 1
 
-    while True:                                   # NEW
+    while True:                                   
         try:
             amount = float(input("Amount of the purchase: "))
             break
@@ -36,13 +42,12 @@ def add_expense(personel_finance):
             print("Please enter a valid number.")
 
     description = input("What did you buy? ")
-    amount = float(input("Amount of the purchase: "))
     category = input("What type of product? ")
     date = input("What date? ")
 
     entry = {"id": next_id, "description": description, "amount": amount, "category": category, "date": date}
     personel_finance["expenses"].append(entry)
-    save_data(personel_finance)   # ADDED
+    save_data(personel_finance)   
     print("Expense added successfully")
 
 def add_income(personel_finance):
@@ -50,9 +55,9 @@ def add_income(personel_finance):
         next_id = max(item["id"] for item in personel_finance["Income"]) + 1
     else:
         next_id = 1
-    description = input("Where did the money come from")
-    amount = float(input("How much"))
-    date = input("What date?")
+    description = input("Where did the money come from " )
+    amount = float(input("How much " ))
+    date = input("What date? " )
 
     entry = {"id": next_id, "description": description, "amount": amount, "date": date}
     personel_finance["Income"].append(entry)
@@ -94,7 +99,6 @@ def statistics(personel_finance):
     print(f"Average price: ${average:.2f}")        
     print(f"Largest expense: ${largest:.2f}")
 
-# NEW — category breakdown, still part of statistics()
     category_totals = {}
     for item in expenses_list:
         cat = item["category"]
@@ -109,7 +113,7 @@ def delete_expense(personel_finance):
         print("No expenses")
         return
 
-    while True:                                   # NEW
+    while True:                                   
         try:
             target_id = int(input("Enter expense ID to delete: "))
             break
@@ -122,12 +126,35 @@ def delete_expense(personel_finance):
         if item["id"] == target_id:
             personel_finance["expenses"].remove(item)
             found = True
-            save_data(personel_finance)   # ADDED
+            save_data(personel_finance)   
             print("Expense deleted successfully.")
             break
 
     if not found:
         print("Expense ID not found.")
+
+
+
+def delete_income(personel_finance):
+    if not personel_finance["Income"]:
+        print("No income")
+        return
+    while True:
+        try:
+            target_id = int(input("Enter income ID to delete: "))
+            break
+        except ValueError:
+            print("Please enter valid ID number. ")
+
+    found = False
+    for item in personel_finance["Income"]:
+        if item["id"] == target_id:
+            personel_finance["Income"].remove(item)
+            found = True
+            save_data(personel_finance)
+            print("Income deleted successfully. ")
+    if not found:
+        print("Income ID not found. ")
 
 personel_finance = load_data()
 
@@ -147,8 +174,8 @@ while True:
     elif choice == "6":
         delete_expense(personel_finance)
     elif choice == "7":
-
+        delete_income(personel_finance)
+    elif choice == "8":
         break
     else:
         print("Invalid option, try again.")
-
